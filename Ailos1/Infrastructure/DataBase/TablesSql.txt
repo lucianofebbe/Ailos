@@ -1,0 +1,49 @@
+﻿-- Tabela Customers
+CREATE TABLE Customers (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Guid UNIQUEIDENTIFIER NOT NULL UNIQUE,
+    IdFather INT,
+    Created DATETIME2 NOT NULL,
+    Updated DATETIME2 NOT NULL,
+    Deleted BIT NOT NULL,
+    NameCustomer NVARCHAR(100),
+    CPF NVARCHAR(14)
+);
+
+-- Tabela BankAccounts
+CREATE TABLE BankAccounts (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Guid UNIQUEIDENTIFIER NOT NULL UNIQUE,
+    IdFather INT,
+    Created DATETIME2 NOT NULL,
+    Updated DATETIME2 NOT NULL,
+    Deleted BIT NOT NULL
+);
+
+-- Tabela de junção N:N entre Customers e BankAccounts
+CREATE TABLE CustomerBankAccounts (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Guid UNIQUEIDENTIFIER NOT NULL UNIQUE,
+    IdCustomer INT NOT NULL,
+    IdBankAccount INT NOT NULL,
+    IdFather INT,
+    Created DATETIME2 NOT NULL,
+    Updated DATETIME2 NOT NULL,
+    Deleted BIT NOT NULL
+    PRIMARY KEY (IdCustomer, IdBankAccount),
+    FOREIGN KEY (IdCustomer) REFERENCES Customers(Id),
+    FOREIGN KEY (IdBankAccount) REFERENCES BankAccounts(Id)
+);
+
+-- Tabela Accounts (múltiplos lançamentos por conta bancária)
+CREATE TABLE Accounts (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Guid UNIQUEIDENTIFIER NOT NULL UNIQUE,
+    IdFather INT,
+    Created DATETIME2 NOT NULL,
+    Updated DATETIME2 NOT NULL,
+    Deleted BIT NOT NULL,
+    IdBankAccount INT NOT NULL,
+    CurrentBalance DECIMAL(18, 2) NOT NULL,
+    FOREIGN KEY (IdBankAccount) REFERENCES BankAccounts(Id)
+);
