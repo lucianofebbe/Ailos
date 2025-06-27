@@ -1,0 +1,7 @@
+0000000000000000000000000000000000000000 a7b94a883ed33bc8d877ba91ccd182fc5c3af57c lucianofebbe <lucianofebbedossantos@hotmail.com> 1751060479 -0300	commit (initial): Commit 1
+a7b94a883ed33bc8d877ba91ccd182fc5c3af57c 2607b958f3b3a0c4fbdcb6c8269d87adfb5b297e lucianofebbe <lucianofebbedossantos@hotmail.com> 1751060608 -0300	commit: Commit 2
+2607b958f3b3a0c4fbdcb6c8269d87adfb5b297e 2607b958f3b3a0c4fbdcb6c8269d87adfb5b297e lucianofebbe <lucianofebbedossantos@hotmail.com> 1751060616 -0300	checkout: moving from master to testing
+2607b958f3b3a0c4fbdcb6c8269d87adfb5b297e 0740b6bf549cb9b7ab23c74e2990d5fca0b9c2d1 lucianofebbe <lucianofebbedossantos@hotmail.com> 1751060760 -0300	commit: Commit 3
+0740b6bf549cb9b7ab23c74e2990d5fca0b9c2d1 2607b958f3b3a0c4fbdcb6c8269d87adfb5b297e lucianofebbe <lucianofebbedossantos@hotmail.com> 1751060767 -0300	checkout: moving from testing to master
+2607b958f3b3a0c4fbdcb6c8269d87adfb5b297e 9500133b7fca350fff6ba8934f6b333dc84c7130 lucianofebbe <lucianofebbedossantos@hotmail.com> 1751061012 -0300	commit: Commit 3
+9500133b7fca350fff6ba8934f6b333dc84c7130 9500133b7fca350fff6ba8934f6b333dc84c7130 lucianofebbe <lucianofebbedossantos@hotmail.com> 1751061024 -0300	checkout: moving from master to master
