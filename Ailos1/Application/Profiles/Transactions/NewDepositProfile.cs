@@ -1,10 +1,10 @@
-﻿using Application.Requests.NewDeposit;
+﻿using Application.Requests.Transactions;
 using AutoMapper;
 using Domain.EntitiesDomains.Sigles;
 using Domain.Filters.AccountsService;
 using Domain.Filters.BankAccountsService;
 
-namespace Application.Profiles.NewDeposit
+namespace Application.Profiles.Transactions
 {
     internal class NewDepositProfile : Profile
     {

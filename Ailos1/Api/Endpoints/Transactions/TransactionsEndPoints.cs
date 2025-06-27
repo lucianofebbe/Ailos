@@ -1,6 +1,4 @@
-﻿
-using Application.Requests.NewDeposit;
-using Application.Requests.Transactions;
+﻿using Application.Requests.Transactions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

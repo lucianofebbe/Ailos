@@ -1,6 +1,6 @@
 ﻿using AilosInfra.Bases.Dtos;
 
-namespace Application.Responses.NewDeposit
+namespace Application.Responses.Transactions
 {
     public record NewDepositResponse : BaseResponse
     {

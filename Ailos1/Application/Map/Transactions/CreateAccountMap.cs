@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Map.NewDeposit
+namespace Application.Map.Transactions
 {
     internal class CreateAccountMap : IMapperSpecific<GetAccountFilter, BankAccountsDomain>
     {

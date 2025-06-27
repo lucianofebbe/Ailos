@@ -1,8 +1,8 @@
 ﻿using AilosInfra.Bases.Dtos;
-using Application.Responses.NewDeposit;
+using Application.Responses.Transactions;
 using MediatR;
 
-namespace Application.Requests.NewDeposit
+namespace Application.Requests.Transactions
 {
     public record NewDepositRequest :  BaseRequest, IRequest<NewDepositResponse>
     {

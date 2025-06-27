@@ -1,10 +1,7 @@
 ﻿using AilosInfra.Interfaces.Mappers.AutoMapper.Mapper;
 using AilosInfra.Interfaces.Mappers.AutoMapper.MapperFactory;
-using Application.Profiles.NewDeposit;
 using Application.Profiles.Transactions;
-using Application.Requests.NewDeposit;
 using Application.Requests.Transactions;
-using Application.Responses.NewDeposit;
 using Application.Responses.Transactions;
 using AutoMapper;
 using Domain.EntitiesDomains.Sigles;
@@ -12,11 +9,6 @@ using Domain.Filters.AccountsService;
 using Domain.Filters.BankAccountsService;
 using Domain.Interfaces;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Handlers.Transactions
 {
