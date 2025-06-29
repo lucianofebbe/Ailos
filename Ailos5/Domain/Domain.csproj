@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\SqlServer\ContaCorrente\Interfaces\Readers\" />
+    <Folder Include="Data\SqlServer\ContaCorrente\Parameters\Readers\" />
+    <Folder Include="Data\SqlServer\ContaCorrente\Readers\" />
+    <Folder Include="Data\_Exemplo\Commands\" />
+    <Folder Include="Data\_Exemplo\Interfaces\Commands\" />
+    <Folder Include="Data\_Exemplo\Interfaces\Readers\" />
+    <Folder Include="Data\_Exemplo\Parameters\Commands\" />
+    <Folder Include="Data\_Exemplo\Parameters\Readers\" />
+    <Folder Include="Data\_Exemplo\Readers\" />
+    <Folder Include="Entities\Redis\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\AilosInfra\AilosInfra\AilosInfra.csproj" />
+  </ItemGroup>
+
+</Project>

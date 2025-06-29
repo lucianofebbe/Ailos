@@ -1,0 +1,10 @@
+﻿Pasta _EXEMPLO e o exemplo de estrutura
+que se deve aplicar ao criar interacoes novas com tabelas novas
+Estrutura visa manter a organizacao e separacao das responsabilidade de cada tipo de
+manipulacao de informacao de cada tabela, assim como separar as responsabilidades
+de leitura e escrita
+
+Para criar uma nova estrutura, copie e cole a pasta _EXEMPLO e apos
+renomeia para a entidade a qual ela vai pertencer
+
+* Para estrutura das Queries, consulta o arquivo BaseQueries dentro da pasta BaseQueries
