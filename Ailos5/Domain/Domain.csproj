@@ -7,9 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Data\SqlServer\ContaCorrente\Interfaces\Readers\" />
-    <Folder Include="Data\SqlServer\ContaCorrente\Parameters\Readers\" />
-    <Folder Include="Data\SqlServer\ContaCorrente\Readers\" />
     <Folder Include="Data\_Exemplo\Commands\" />
     <Folder Include="Data\_Exemplo\Interfaces\Commands\" />
     <Folder Include="Data\_Exemplo\Interfaces\Readers\" />

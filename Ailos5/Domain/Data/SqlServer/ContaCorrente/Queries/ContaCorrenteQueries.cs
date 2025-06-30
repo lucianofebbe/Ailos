@@ -17,13 +17,29 @@
                 [Ativo] = @Ativo
                 WHERE [Id] = @Id;";
 
-        public static string Get() =>
+        public static string Delete() =>
             throw new NotImplementedException();
 
-        public static string Delete() =>
+        public static string Get() =>
             throw new NotImplementedException();
 
         public static string GetAll() =>
             throw new NotImplementedException();
+
+        public static string GetByNumeroDaConta() =>
+            @"SELECT TOP 1
+                Id,
+                NumeroDaConta,
+                NomeDoCliente,
+                Ativo,
+                IdFather,
+                Guid,
+                Created,
+                Updated,
+                Deleted
+            FROM
+                dbo.ContaCorrente
+            WHERE
+                NumeroDaConta = @NumeroDaConta";
     }
 }

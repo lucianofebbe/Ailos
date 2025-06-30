@@ -13,7 +13,10 @@
 
   <ItemGroup>
     <Folder Include="Maps\ContaCorrenteHandler\" />
+    <Folder Include="Maps\Movimento\" />
+    <Folder Include="Middleware\" />
     <Folder Include="Validators\ContaCorrenteHandler\" />
+    <Folder Include="Validators\Movimento\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -13,7 +13,7 @@ namespace Api.Endpoints.ContaCorrente
         {
             app.MapPost("/CadastraCliente", async (
                 [FromServices] IMediator mediator,
-                [FromBody] ContaCorrenteRequest request) =>
+                [FromBody] ContaCorrenteCreateRequest request) =>
             {
                 var result = await mediator.Send(request);
                 return Results.Ok(result);

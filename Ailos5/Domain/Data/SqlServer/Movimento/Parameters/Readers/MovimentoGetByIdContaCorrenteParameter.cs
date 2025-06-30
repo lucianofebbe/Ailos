@@ -2,6 +2,6 @@
 {
     public record class MovimentoGetByIdContaCorrenteParameter
     {
-        public Guid IdContaCorrente { get; set; }
+        public int IdContaCorrente { get; set; }
     }
 }

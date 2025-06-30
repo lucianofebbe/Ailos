@@ -7,6 +7,8 @@ namespace AilosInfra.Bases.Dtos
     /// </summary>
     public record BaseResponse
     {
+        public string Message { get; set; }
+        public bool Success { get; set; } = true;
         /// <summary>
         /// Normaliza a entrada removendo espaços em branco e convertendo para minúsculas usando cultura invariante.
         /// </summary>

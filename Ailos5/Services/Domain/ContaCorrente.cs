@@ -2,6 +2,7 @@
 {
     public class ContaCorrente
     {
+        public int Id { get; set; }
         public Guid Guid { get; private set; }
         public Guid Conta { get; private set; }
         public string Cliente { get; private set; }
@@ -13,6 +14,20 @@
             Conta = conta;
             Cliente = cliente;
             Ativo = ativo;
+        }
+
+        public ContaCorrente(int id, Guid guid, Guid conta, string cliente, bool ativo)
+        {
+            SetId(id);
+            Guid = guid;
+            Conta = conta;
+            Cliente = cliente;
+            Ativo = ativo;
+        }
+
+        public void SetId(int id)
+        {
+            Id = id;
         }
 
         public void SetGuid(Guid guid)

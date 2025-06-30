@@ -12,27 +12,42 @@
         public static string Update() =>
             throw new NotImplementedException();
 
-        public static string Get() =>
+        public static string Delete() =>
             throw new NotImplementedException();
 
-        public static string Delete() =>
+        public static string Get() =>
             throw new NotImplementedException();
 
         public static string GetAll() =>
             throw new NotImplementedException();
 
         public static string GetByIdContaCorrente() =>
-            @"SELECT TOP 1 
-                        Id,
-                        IdFather,
-                        Guid,
-                        Created,
-                        Updated,
-                        Deleted,
-                        IdContaCorrente,
-                        DataMovimento,
-                        TipoMovimento,
-                        Valor
+            @"SELECT Id,
+                     IdFather,
+                     Guid,
+                     Created,
+                     Updated,
+                     Deleted,
+                     IdContaCorrente,
+                     DataMovimento,
+                     TipoMovimento,
+                     Valor
+                    FROM Movimento
+                    WHERE IdContaCorrente = @IdContaCorrente
+                    ORDER BY Id ASC;";
+
+        public static string GetByIdUltimoMovimentoContaCorrente() =>
+                    @"SELECT TOP 1
+                     Id,
+                     IdFather,
+                     Guid,
+                     Created,
+                     Updated,
+                     Deleted,
+                     IdContaCorrente,
+                     DataMovimento,
+                     TipoMovimento,
+                     Valor
                     FROM Movimento
                     WHERE IdContaCorrente = @IdContaCorrente
                     ORDER BY Id ASC;";
