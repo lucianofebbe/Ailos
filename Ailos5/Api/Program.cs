@@ -1,6 +1,7 @@
 using Api.Endpoints;
 using System.Text.Json;
 using Application.DependencyInjection;
+using Application.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +55,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseMiddleware<RequestCacheMiddleware>();
+
 //Carrega todos os Endpois que estao com a interface IMap dentro de maps
 var maps = typeof(Program).Assembly
     .GetTypes()
@@ -64,5 +67,4 @@ var maps = typeof(Program).Assembly
 foreach (var map in maps)
     map.Map(app);
 
-app.Run();
 app.Run();

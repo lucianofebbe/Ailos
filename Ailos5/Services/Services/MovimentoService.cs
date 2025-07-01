@@ -27,6 +27,7 @@ namespace Services.Services
         private IMapperSpecificFactory<GetSaldoAtualFilter, GetContaCorrenteFilter> _MapperGetSaldoAtualFilter;
         private IMovimentoByIdContaCorrente _IMovimentoByIdContaCorrente;
         private IMapperSpecificFactory<MovimentoGetByIdContaCorrenteParameter, EntitieServices.ContaCorrente> _MapperContaCorrenteGetByIdContaCorrenteParameter;
+        private IMapperSpecificFactory<GetSaldoAtualFilter, InitMovimentoFilter> _MapperValidaSaldoParaDebito;
 
         //InitMovimentoAsync
         private IMapperSpecificFactory<InitMovimentoFilter, GetContaCorrenteFilter> _MapperInitMovimentoFilter;
@@ -45,6 +46,7 @@ namespace Services.Services
             IMapperSpecificFactory<InitMovimentoFilter, GetContaCorrenteFilter> mapperInitMovimentoFilter,
             IUltimoMovimentoByIdContaCorrente iUltimoMovimentoByIdContaCorrente,
             IMapperSpecificFactory<EntitieServices.ContaCorrente, UltimoMovimentoGetByIdContaCorrenteParameter> mapperContaCorrenteToFilterUltimoMovimento,
+            IMapperSpecificFactory<GetSaldoAtualFilter, InitMovimentoFilter> mapperValidaSaldoParaDebito,
             IMovimentoCreate iMovimentoCreate,
             IMapperSpecific<EntitieServices.Movimento, EntitieDomain.Movimento> mapperResultInitMovimento,
             IList<Profile> profiles)
@@ -56,6 +58,7 @@ namespace Services.Services
             _MapperInitMovimentoFilter = mapperInitMovimentoFilter;
             _MapperContaCorrenteToFilterUltimoMovimento = mapperContaCorrenteToFilterUltimoMovimento;
             _IUltimoMovimentoByIdContaCorrente = iUltimoMovimentoByIdContaCorrente;
+            _MapperValidaSaldoParaDebito = mapperValidaSaldoParaDebito;
             _IMovimentoCreate = iMovimentoCreate;
             _MapperResultInitMovimento = mapperResultInitMovimento;
             _Profiles = profiles;
@@ -75,8 +78,8 @@ namespace Services.Services
 
                 if (movimentos.Success)
                 {
-                    var creditos = movimentos.Item.Where(o => o.TipoMovimento == 'C').Sum(o => o.Valor);
-                    var debitos = movimentos.Item.Where(o => o.TipoMovimento == 'D').Sum(o => o.Valor);
+                    var creditos = movimentos.Item.Where(o => o.TipoMovimento == 'c').Sum(o => o.Valor);
+                    var debitos = movimentos.Item.Where(o => o.TipoMovimento == 'd').Sum(o => o.Valor);
                     var saldo = debitos - creditos;
                     var result = new EntitieServices.Movimento(DateTime.UtcNow, saldo);
                     return TransportResult<EntitieServices.Movimento>.Create(result);
@@ -88,9 +91,24 @@ namespace Services.Services
 
         public async Task<TransportResult<EntitieServices.Movimento>> InitMovimentoAsync(InitMovimentoFilter item)
         {
+            _Profiles.Add(new InitMovimentoFilterProfile());
+
+            if (item.TipoDeMovimento == 'c' && item.Valor <= 0)
+                return TransportResult<EntitieServices.Movimento>.Create(null, notFoundMessage: "Para operacoes de credito, somente valores positivos");
+            if (item.TipoDeMovimento == 'd')
+            {
+                var facParameter = await _MapperValidaSaldoParaDebito.Create(_Profiles);
+                var parameter = await facParameter.MapperAsync(item);
+                var saldoCorrente = await GetSaldoAtualAsync(parameter);
+                if (saldoCorrente.Success)
+                {
+                    if (saldoCorrente.Item.Valor < 0 || (item.Valor - saldoCorrente.Item.Valor) < 0)
+                        return TransportResult<EntitieServices.Movimento>.Create(null, notFoundMessage: "Saldo insuficiente.");
+                }
+            }
+
             if (item.TipoDeMovimento == 'c' || item.TipoDeMovimento == 'd')
             {
-                _Profiles.Add(new InitMovimentoFilterProfile());
                 var facMapperGetSaldoAtualFilter = await _MapperInitMovimentoFilter.Create(_Profiles);
                 var parameterGetContaCorrenteAsync = await facMapperGetSaldoAtualFilter.MapperAsync(item);
                 var contaCorrente = await _IContaCorrenteService.GetContaCorrenteAsync(parameterGetContaCorrenteAsync);
@@ -98,7 +116,7 @@ namespace Services.Services
                 {
                     var facFilterUltimoMovimento = await _MapperContaCorrenteToFilterUltimoMovimento.Create(_Profiles);
                     var parameterUltimoMovimento = await facFilterUltimoMovimento.MapperAsync(contaCorrente.Item);
-                    var ultimaMovimentacao =  await _IUltimoMovimentoByIdContaCorrente.GetByIdUltimoMovimentoContaCorrente(parameterUltimoMovimento);
+                    var ultimaMovimentacao = await _IUltimoMovimentoByIdContaCorrente.GetByIdUltimoMovimentoContaCorrente(parameterUltimoMovimento);
                     var novoMovimento = new MovimentoCreateParameter()
                     {
                         DataMovimento = DateTime.UtcNow,
@@ -111,6 +129,10 @@ namespace Services.Services
                     if (result.Success)
                     {
                         var response = await _MapperResultInitMovimento.MapperAsync(result.Item);
+                        response.SetTipoMovimento(novoMovimento.TipoMovimento);
+                        response.SetValor(novoMovimento.Valor);
+                        response.SetDataMovimento(novoMovimento.DataMovimento);
+
                         return TransportResult<EntitieServices.Movimento>.Create(response);
                     }
                     return TransportResult<EntitieServices.Movimento>.Create(null, notFoundMessage: "Ocorreu um erro ao fazer o movimento, tente denovo");

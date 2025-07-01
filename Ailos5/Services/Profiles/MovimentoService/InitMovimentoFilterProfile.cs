@@ -36,6 +36,10 @@ namespace Services.Profiles.MovimentoService
             CreateMap<EntitieServices.Movimento, EntitieDomain.Movimento>()
                 .ForMember(dest => dest.IdContaCorrente, opt => opt.MapFrom(src => src.Id))
                 .ReverseMap();
+
+            CreateMap<GetSaldoAtualFilter, InitMovimentoFilter>()
+                .ForMember(dest => dest.NumeroContaCorrente, opt => opt.MapFrom(src => src.NumeroDaConta))
+                .ReverseMap();
         }
     }
 }

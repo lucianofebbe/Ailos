@@ -74,6 +74,10 @@ namespace AilosInfra.DataBases.RedisDb.UnitOfWork
                 redisQuery = Translate(commandSettings.Predicate.Body); // Converte expressão lambda para query RediSearch
 
             var result = await db.ExecuteAsync("FT.SEARCH", indexName, redisQuery, "LIMIT", 0, 1);
+
+            if (commandSettings.DeleteAfterReader)
+                await DeleteAsync(commandSettings);
+
             return ParseSearchResult(result).FirstOrDefault(); // Parseia resultado e retorna o primeiro
         }
 
@@ -90,6 +94,9 @@ namespace AilosInfra.DataBases.RedisDb.UnitOfWork
                 commandSettings.Offset.ToString(),
                 commandSettings.Limit.ToString(),
                 "RETURN", "1", "$");
+
+            if (commandSettings.DeleteAfterReader)
+                await DeleteAsync(commandSettings);
 
             return ParseSearchResult(result);
         }

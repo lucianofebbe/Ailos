@@ -9,8 +9,9 @@ namespace Application.Responses.Movimento
 {
     public record InitMovimentoResponse : BaseResponse
     {
-        public DateTime DataMovimento { get; set; }
+        public Guid Guid { get; set; }
         public Guid NumeroDaConta { get; set; }
+        public DateTime DataMovimento { get; set; }
         public decimal Valor { get; set; }
     }
 }

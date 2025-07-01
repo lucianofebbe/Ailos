@@ -23,7 +23,7 @@ namespace Application.Profiles.Movimento
 
             CreateMap<Entitie.Movimento, InitMovimentoResponse>()
                 .ForMember(dest => dest.DataMovimento, opt => opt.MapFrom(src => src.DataMovimento))
-                .ForMember(dest => dest.NumeroDaConta, opt => opt.MapFrom(src => src.Guid))
+                .ForMember(dest => dest.Guid, opt => opt.MapFrom(src => src.Guid))
                 .ForMember(dest => dest.Valor, opt => opt.MapFrom(src => src.Valor))
                 .ReverseMap();
         }

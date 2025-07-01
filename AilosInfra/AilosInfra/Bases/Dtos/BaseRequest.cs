@@ -7,6 +7,7 @@ namespace AilosInfra.Bases.Dtos
     /// </summary>
     public record BaseRequest
     {
+        public Guid KeyRequest { get; set; }
         /// <summary>
         /// Normaliza a entrada removendo espaços em branco e convertendo para minúsculas invariant culture.
         /// </summary>

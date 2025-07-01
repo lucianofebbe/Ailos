@@ -50,6 +50,6 @@
                      Valor
                     FROM Movimento
                     WHERE IdContaCorrente = @IdContaCorrente
-                    ORDER BY Id ASC;";
+                    ORDER BY Id DESC;";
     }
 }

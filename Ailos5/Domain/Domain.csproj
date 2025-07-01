@@ -13,7 +13,6 @@
     <Folder Include="Data\_Exemplo\Parameters\Commands\" />
     <Folder Include="Data\_Exemplo\Parameters\Readers\" />
     <Folder Include="Data\_Exemplo\Readers\" />
-    <Folder Include="Entities\Redis\" />
   </ItemGroup>
 
   <ItemGroup>
