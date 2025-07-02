@@ -7,8 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\AilosInfra\AilosInfra\AilosInfra.csproj" />
+    <PackageReference Include="AutoMapper" Version="14.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="AilosInfra">
+      <HintPath>..\..\AilosInfra\AilosInfra\bin\Release\net8.0\AilosInfra.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

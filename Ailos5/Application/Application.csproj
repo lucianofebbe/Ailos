@@ -23,7 +23,15 @@
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.6" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NReJSON" Version="4.0.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="AilosInfra">
+      <HintPath>..\..\AilosInfra\AilosInfra\bin\Release\net8.0\AilosInfra.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -15,4 +15,10 @@
     <ProjectReference Include="..\Application\Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="AilosInfra">
+      <HintPath>..\..\AilosInfra\AilosInfra\bin\Release\net8.0\AilosInfra.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

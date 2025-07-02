@@ -16,7 +16,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\AilosInfra\AilosInfra\AilosInfra.csproj" />
+    <PackageReference Include="Dapper" Version="2.1.66" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="AilosInfra">
+      <HintPath>..\..\AilosInfra\AilosInfra\bin\Release\net8.0\AilosInfra.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
