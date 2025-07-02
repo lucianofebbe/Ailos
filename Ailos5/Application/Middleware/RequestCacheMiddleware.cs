@@ -1,9 +1,15 @@
 ﻿using AilosInfra.Bases.Dtos;
-using AilosInfra.Interfaces.DataBase.RedisDb.UnitOfWorkFactory;
-using AilosInfra.Settings.DataBases.RedisDb.Settings;
-using Domain.Entities.Redis;
+using AilosInfra.Interfaces.DataBase.Dapper.UnitOfWork;
+using AilosInfra.Interfaces.DataBase.Dapper.UnitOfWorkFactory;
+using AilosInfra.Settings.DataBases.Dapper.Settings;
+using Dapper;
+using Domain.Entities.Sql;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.Data.SqlClient;
 using System.Text;
 using System.Text.Json;
 
@@ -12,7 +18,7 @@ namespace Application.Middleware
     public class RequestCacheMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ConnectionSettings _ConnectionSettings;
+        private ConnectionSettings _ConnectionSettings;
 
         public RequestCacheMiddleware(RequestDelegate next, ConnectionSettings connectionSettings)
         {
@@ -36,17 +42,30 @@ namespace Application.Middleware
         {
             if (key == Guid.Empty) return false;
 
-            var factory = context.RequestServices.GetRequiredService<IUnitOfWorkFactory<Idempotence>>();
-            var unit = await factory.Create(_ConnectionSettings);
+            var unit = await CreateNewFactory(context);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@Guid", key);
+
             var cached = await unit.GetAsync(new CommandSettings<Idempotence>
             {
                 Entity = new Idempotence(),
-                Predicate = x => x.Guid == key,
-                DeleteAfterReader = true
+                CommandType = TypeCommand.Query,
+                Query = @"SELECT TOP 1 [Value] FROM [dbo].[Idempotence] WHERE [Guid] = @Guid AND [Deleted] = 0",
+                Parameters = parameters
             });
 
             if (cached != null)
             {
+                unit = await CreateNewFactory(context);
+                _ = await unit.UpdateAsync(new CommandSettings<Idempotence>()
+                {
+                    Entity = new Idempotence(),
+                    CommandType = TypeCommand.Query,
+                    Query = @"UPDATE [dbo].[Idempotence] SET [Deleted] = 1 WHERE [Guid] = @Guid",
+                    Parameters = parameters
+                });
+
                 context.Response.StatusCode = 200;
                 context.Response.ContentType = "application/json";
                 await context.Response.WriteAsync(cached.Value);
@@ -88,8 +107,17 @@ namespace Application.Middleware
             if (!obj.Success)
                 return;
 
-            var factory = context.RequestServices.GetRequiredService<IUnitOfWorkFactory<Idempotence>>();
-            var unit = await factory.Create(_ConnectionSettings);
+            var unit = await CreateNewFactory(context);
+
+            string query = @"INSERT INTO[dbo].[Idempotence] ([Value], [Guid], [Created], [Updated], [Deleted])
+                    VALUES(@Value, @Guid, @Created, @Updated, @Deleted);";
+
+            var parameter = new DynamicParameters();
+            parameter.Add("@Value", responseBody);
+            parameter.Add("@Guid", key);
+            parameter.Add("@Created", DateTime.UtcNow);
+            parameter.Add("@Updated", DateTime.UtcNow);
+            parameter.Add("@Deleted", false);
 
             await unit.InsertAsync(new CommandSettings<Idempotence>
             {
@@ -99,7 +127,9 @@ namespace Application.Middleware
                     Value = responseBody,
                     Created = DateTime.UtcNow
                 },
-                ExpireItem = TimeSpan.FromDays(1)
+                CommandType = TypeCommand.Query,
+                Parameters = parameter,
+                Query = query
             });
         }
 
@@ -128,6 +158,25 @@ namespace Application.Middleware
             }
 
             return Guid.Empty;
+        }
+
+        private async Task<IUnitOfWork<Idempotence>> CreateNewFactory(HttpContext context)
+        {
+            ConnectionSettings connection;
+            if (_ConnectionSettings.Connection.State == System.Data.ConnectionState.Closed)
+            {
+                connection = new ConnectionSettings
+                {
+                    Connection = new SqlConnection(_ConnectionSettings.ConnectionString),
+                    ConnectionString = _ConnectionSettings.ConnectionString,
+                    EnableTransaction = _ConnectionSettings.EnableTransaction
+                };
+            }
+            else
+                connection = _ConnectionSettings;
+
+            var factory = context.RequestServices.GetRequiredService<IUnitOfWorkFactory<Idempotence>>();
+            return await factory.Create(connection);
         }
     }
 }

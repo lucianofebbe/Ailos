@@ -6,6 +6,7 @@ using System.Reflection;
 using AilosInfra.Interfaces.DataBase.RedisDb.UnitOfWork;
 using AilosInfra.Settings.DataBases.RedisDb.Settings;
 using AilosInfra.Bases.Entities;
+using Util.SerializerProxy;
 namespace AilosInfra.DataBases.RedisDb.UnitOfWork
 {
     public class UnitOfWork<T> : IUnitOfWork<T> where T : BaseEntitiesRedisDb
@@ -17,6 +18,8 @@ namespace AilosInfra.DataBases.RedisDb.UnitOfWork
         private ConnectionMultiplexer connectionMultiplexer;
         public UnitOfWork(ConnectionSettings connectionSettings)
         {
+            NReJSONSerializer.SerializerProxy = new SerializerProxy();
+
             var config = new ConfigurationOptions()
             {
                 Password = connectionSettings.Password,
@@ -37,7 +40,8 @@ namespace AilosInfra.DataBases.RedisDb.UnitOfWork
 
         public virtual async Task<Guid> InsertAsync(CommandSettings<T> commandSettings)
         {
-            commandSettings.Entity.Guid = Guid.NewGuid();
+            if (commandSettings.Entity.Guid == Guid.Empty)
+                commandSettings.Entity.Guid = Guid.NewGuid();
 
             RedisKey key = keyPrefix + commandSettings.Entity.Guid;
 

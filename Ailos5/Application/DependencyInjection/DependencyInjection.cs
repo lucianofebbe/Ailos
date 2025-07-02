@@ -1,7 +1,9 @@
 ﻿using AilosInfra.Interfaces.Mappers.AutoMapper.Mapper;
 using AilosInfra.Interfaces.Mappers.AutoMapper.MapperFactory;
 using AilosInfra.Mappers.AutoMapper.MapperFactory;
+using AilosInfra.Settings.DataBases.Dapper.Settings;
 using Application.Handlers.ContaCorrente;
+using Application.Middleware;
 using Application.Requests.ContaCorrente;
 using Application.Requests.Movimento;
 using Application.Responses.ContaCorrente;
@@ -18,9 +20,11 @@ using Domain.Data.SqlServer.Movimento.Interfaces.Commands;
 using Domain.Data.SqlServer.Movimento.Interfaces.Readers;
 using Domain.Data.SqlServer.Movimento.Parameters.Readers;
 using Domain.Data.SqlServer.Movimento.Readers;
-using Domain.Entities.Redis;
+using Domain.Entities.Sql;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NReJSON;
 using Services.Domain;
 using Services.Filters.ContaCorrenteService;
 using Services.Filters.MovimentoService;
@@ -54,10 +58,16 @@ namespace Application.DependencyInjection
             services.AddScoped<IList<Profile>>(provider => new List<Profile>());
 
             //utilizado pela lib Dapper
-            services.AddTransient(provider => new DapperSettings.ConnectionSettings
+            services.AddTransient(provider =>
             {
-                Connection = new SqlConnection(configuration.GetConnectionString("SqlServerConnection")),
-            }); 
+                var connectionString = configuration.GetConnectionString("SqlServerConnection");
+                return new ConnectionSettings
+                {
+                    Connection = new SqlConnection(connectionString),
+                    ConnectionString = connectionString,
+                    EnableTransaction = false
+                };
+            });
 
             //utilizado pelo Redis
             var endPoints = new List<string>();
@@ -67,6 +77,7 @@ namespace Application.DependencyInjection
                 EndPoints = endPoints,
                 Password = "Admin"
             });
+
 
             AddInfrastructureToolKit(services, configuration);
             AddInfrastructure(services, configuration);
@@ -87,8 +98,6 @@ namespace Application.DependencyInjection
 
         public static void AddInfrastructure(IServiceCollection services, IConfiguration configuration)
         {
-
-
 
         }
 
@@ -113,7 +122,8 @@ namespace Application.DependencyInjection
             //MovimentoReader
             services.AddScoped<DapperIUnit.IUnitOfWorkFactory<EntitieDomain.Movimento>, DapperUnit.UnitOfWorkFactory<EntitieDomain.Movimento>>();
 
-            services.AddScoped<RedisIDbUnit.IUnitOfWorkFactory<Idempotence>, RedisDbUnit.UnitOfWorkFactory<Idempotence>>();
+            //services.AddScoped<RedisIDbUnit.IUnitOfWorkFactory<Idempotence>, RedisDbUnit.UnitOfWorkFactory<Idempotence>>();
+            services.AddScoped<DapperIUnit.IUnitOfWorkFactory<EntitieDomain.Idempotence>,DapperUnit.UnitOfWorkFactory<EntitieDomain.Idempotence>>();
         }
 
         public static void AddApplication(IServiceCollection services, IConfiguration configuration)
@@ -150,16 +160,16 @@ namespace Application.DependencyInjection
             //ContaCorrenteService
             services.AddScoped<IContaCorrenteCreate, ContaCorrenteCreate>();
             services.AddScoped<IMapperSpecificFactory<ContaCorrenteCreateParameter, CreateFilter>, MapperSpecificFactory<ContaCorrenteCreateParameter, CreateFilter>>();
-            services.AddScoped<IMapperSpecific<ContaCorrente, EntitieDomain.ContaCorrente>, ContaCorrenteResultMap>();
+            services.AddScoped<IMapperSpecific<EntitieServices.ContaCorrente, EntitieDomain.ContaCorrente>, ContaCorrenteResultMap>();
             services.AddScoped<IMapperSpecificFactory<ContaCorrenteByNumeroDaContaParameter, GetContaCorrenteFilter>, MapperSpecificFactory<ContaCorrenteByNumeroDaContaParameter, GetContaCorrenteFilter>>();
-            services.AddScoped<IMapperSpecific<ContaCorrente, EntitieDomain.ContaCorrente>, ContaCorrenteResultMap>();
+            services.AddScoped<IMapperSpecific<EntitieServices.ContaCorrente, EntitieDomain.ContaCorrente>, ContaCorrenteResultMap>();
             services.AddScoped<IMapperSpecificFactory<GetSaldoAtualFilter, InitMovimentoFilter>, MapperSpecificFactory<GetSaldoAtualFilter, InitMovimentoFilter>>();
 
             //MovimentoService
             services.AddScoped<IContaCorrenteService, ContaCorrenteService>();
             services.AddScoped<IMapperSpecificFactory<GetSaldoAtualFilter, GetContaCorrenteFilter>, MapperSpecificFactory<GetSaldoAtualFilter, GetContaCorrenteFilter>>();
             services.AddScoped<IMovimentoByIdContaCorrente, MovimentoByIdContaCorrente>();
-            services.AddScoped<IMapperSpecificFactory<MovimentoGetByIdContaCorrenteParameter, ContaCorrente>, MapperSpecificFactory<MovimentoGetByIdContaCorrenteParameter, ContaCorrente>>();
+            services.AddScoped<IMapperSpecificFactory<MovimentoGetByIdContaCorrenteParameter, EntitieServices.ContaCorrente>, MapperSpecificFactory<MovimentoGetByIdContaCorrenteParameter, EntitieServices.ContaCorrente>>();
             services.AddScoped<IMapperSpecificFactory<InitMovimentoFilter, GetContaCorrenteFilter>, MapperSpecificFactory<InitMovimentoFilter, GetContaCorrenteFilter>>();
             services.AddScoped<IMapperSpecificFactory<EntitieServices.ContaCorrente, UltimoMovimentoGetByIdContaCorrenteParameter>, MapperSpecificFactory<EntitieServices.ContaCorrente, UltimoMovimentoGetByIdContaCorrenteParameter>>();
             services.AddScoped<IUltimoMovimentoByIdContaCorrente, UltimoMovimentoByIdContaCorrente>();
