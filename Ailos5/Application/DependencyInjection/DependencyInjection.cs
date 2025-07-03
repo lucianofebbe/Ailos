@@ -3,7 +3,6 @@ using AilosInfra.Interfaces.Mappers.AutoMapper.MapperFactory;
 using AilosInfra.Mappers.AutoMapper.MapperFactory;
 using AilosInfra.Settings.DataBases.Dapper.Settings;
 using Application.Handlers.ContaCorrente;
-using Application.Middleware;
 using Application.Requests.ContaCorrente;
 using Application.Requests.Movimento;
 using Application.Responses.ContaCorrente;
@@ -20,12 +19,8 @@ using Domain.Data.SqlServer.Movimento.Interfaces.Commands;
 using Domain.Data.SqlServer.Movimento.Interfaces.Readers;
 using Domain.Data.SqlServer.Movimento.Parameters.Readers;
 using Domain.Data.SqlServer.Movimento.Readers;
-using Domain.Entities.Sql;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NReJSON;
-using Services.Domain;
 using Services.Filters.ContaCorrenteService;
 using Services.Filters.MovimentoService;
 using Services.Interfaces.ContaCorrenteService;
@@ -34,12 +29,12 @@ using Services.Maps.ContaCorrenteService;
 using Services.Maps.MovimentoService;
 using Services.Services;
 using System.Data.SqlClient;
+using DapperDomain = Domain.Entities.Sql;
 using DapperIUnit = AilosInfra.Interfaces.DataBase.Dapper.UnitOfWorkFactory;
-using DapperSettings = AilosInfra.Settings.DataBases.Dapper.Settings;
 using DapperUnit = AilosInfra.DataBases.Dapper.UnitOfWorkFactory;
-using EntitieDomain = Domain.Entities.Sql;
 using EntitieServices = Services.Domain;
 using RedisDbUnit = AilosInfra.DataBases.RedisDb.UnitOfWorkFactory;
+using RedisDomain = Domain.Entities.Redis;
 using RedisIDbUnit = AilosInfra.Interfaces.DataBase.RedisDb.UnitOfWorkFactory;
 using RedisSettings = AilosInfra.Settings.DataBases.RedisDb.Settings;
 
@@ -116,14 +111,14 @@ namespace Application.DependencyInjection
         public static void AddDomainDependeces(IServiceCollection services, IConfiguration configuration)
         {
             //ContaCorrenteComand
-            services.AddScoped<DapperIUnit.IUnitOfWorkFactory<EntitieDomain.ContaCorrente>, DapperUnit.UnitOfWorkFactory<EntitieDomain.ContaCorrente>>();
+            services.AddScoped<DapperIUnit.IUnitOfWorkFactory<DapperDomain.ContaCorrente>, DapperUnit.UnitOfWorkFactory<DapperDomain.ContaCorrente>>();
 
             //MovimentoComand
             //MovimentoReader
-            services.AddScoped<DapperIUnit.IUnitOfWorkFactory<EntitieDomain.Movimento>, DapperUnit.UnitOfWorkFactory<EntitieDomain.Movimento>>();
+            services.AddScoped<DapperIUnit.IUnitOfWorkFactory<DapperDomain.Movimento>, DapperUnit.UnitOfWorkFactory<DapperDomain.Movimento>>();
 
-            //services.AddScoped<RedisIDbUnit.IUnitOfWorkFactory<Idempotence>, RedisDbUnit.UnitOfWorkFactory<Idempotence>>();
-            services.AddScoped<DapperIUnit.IUnitOfWorkFactory<EntitieDomain.Idempotence>,DapperUnit.UnitOfWorkFactory<EntitieDomain.Idempotence>>();
+            services.AddScoped<RedisIDbUnit.IUnitOfWorkFactory<RedisDomain.Idempotence>, RedisDbUnit.UnitOfWorkFactory<RedisDomain.Idempotence>>();
+            services.AddScoped<DapperIUnit.IUnitOfWorkFactory<DapperDomain.Idempotence>,DapperUnit.UnitOfWorkFactory<DapperDomain.Idempotence>>();
         }
 
         public static void AddApplication(IServiceCollection services, IConfiguration configuration)
@@ -160,9 +155,9 @@ namespace Application.DependencyInjection
             //ContaCorrenteService
             services.AddScoped<IContaCorrenteCreate, ContaCorrenteCreate>();
             services.AddScoped<IMapperSpecificFactory<ContaCorrenteCreateParameter, CreateFilter>, MapperSpecificFactory<ContaCorrenteCreateParameter, CreateFilter>>();
-            services.AddScoped<IMapperSpecific<EntitieServices.ContaCorrente, EntitieDomain.ContaCorrente>, ContaCorrenteResultMap>();
+            services.AddScoped<IMapperSpecific<EntitieServices.ContaCorrente, DapperDomain.ContaCorrente>, ContaCorrenteResultMap>();
             services.AddScoped<IMapperSpecificFactory<ContaCorrenteByNumeroDaContaParameter, GetContaCorrenteFilter>, MapperSpecificFactory<ContaCorrenteByNumeroDaContaParameter, GetContaCorrenteFilter>>();
-            services.AddScoped<IMapperSpecific<EntitieServices.ContaCorrente, EntitieDomain.ContaCorrente>, ContaCorrenteResultMap>();
+            services.AddScoped<IMapperSpecific<EntitieServices.ContaCorrente, DapperDomain.ContaCorrente>, ContaCorrenteResultMap>();
             services.AddScoped<IMapperSpecificFactory<GetSaldoAtualFilter, InitMovimentoFilter>, MapperSpecificFactory<GetSaldoAtualFilter, InitMovimentoFilter>>();
 
             //MovimentoService
@@ -174,7 +169,7 @@ namespace Application.DependencyInjection
             services.AddScoped<IMapperSpecificFactory<EntitieServices.ContaCorrente, UltimoMovimentoGetByIdContaCorrenteParameter>, MapperSpecificFactory<EntitieServices.ContaCorrente, UltimoMovimentoGetByIdContaCorrenteParameter>>();
             services.AddScoped<IUltimoMovimentoByIdContaCorrente, UltimoMovimentoByIdContaCorrente>();
             services.AddScoped<IMovimentoCreate, MovimentoCreate>();
-            services.AddScoped<IMapperSpecific<EntitieServices.Movimento, EntitieDomain.Movimento>, InitMovimentoResultMap>();
+            services.AddScoped<IMapperSpecific<EntitieServices.Movimento, DapperDomain.Movimento>, InitMovimentoResultMap>();
 
         }
 

@@ -73,36 +73,20 @@ namespace AilosInfra.DataBases.RedisDb.UnitOfWork
 
         public virtual async Task<T?> GetAsync(CommandSettings<T> commandSettings)
         {
-            string redisQuery = "*";
-            if (commandSettings.Predicate != null)
-                redisQuery = Translate(commandSettings.Predicate.Body); // Converte expressão lambda para query RediSearch
+            var key = keyPrefix + commandSettings.Entity.Guid;
+            var result = await db.ExecuteAsync("JSON.GET", key);
 
-            var result = await db.ExecuteAsync("FT.SEARCH", indexName, redisQuery, "LIMIT", 0, 1);
+            if (result is { IsNull: false })
+            {
+                if (commandSettings.RenewItem.HasValue)
+                    await db.KeyExpireAsync(key, commandSettings.RenewItem.Value);
 
-            if (commandSettings.DeleteAfterReader)
-                await DeleteAsync(commandSettings);
+                if (commandSettings.DeleteAfterReader)
+                    await DeleteAsync(commandSettings);
 
-            return ParseSearchResult(result).FirstOrDefault(); // Parseia resultado e retorna o primeiro
-        }
-
-        public virtual async Task<List<T>> GetAllAsync(CommandSettings<T> commandSettings)
-        {
-            string redisQuery = "*";
-            if (commandSettings.Predicate != null)
-                redisQuery = Translate(commandSettings.Predicate.Body);
-
-            var result = await db.ExecuteAsync("FT.SEARCH",
-                indexName,
-                redisQuery,
-                "LIMIT",
-                commandSettings.Offset.ToString(),
-                commandSettings.Limit.ToString(),
-                "RETURN", "1", "$");
-
-            if (commandSettings.DeleteAfterReader)
-                await DeleteAsync(commandSettings);
-
-            return ParseSearchResult(result);
+                return JsonConvert.DeserializeObject<T>(result.ToString());
+            }
+            return null;
         }
 
         private void EnsureIndexCreated()
@@ -205,101 +189,6 @@ namespace AilosInfra.DataBases.RedisDb.UnitOfWork
             }
 
             return list;
-        }
-
-
-        private string Translate(Expression expr)
-        {
-            object? Evaluate(Expression expression)
-            {
-                if (expression is ConstantExpression constant)
-                    return constant.Value;
-
-                var lambda = Expression.Lambda(expression);
-                var compiled = lambda.Compile();
-                return compiled.DynamicInvoke();
-            }
-
-            switch (expr)
-            {
-                case BinaryExpression be:
-                    Expression left = be.Left, right = be.Right;
-
-                    if (left is MethodCallExpression leftCall && leftCall.Method.Name == "ToString" && leftCall.Object is MemberExpression leftMember)
-                        left = leftMember;
-
-                    if (right is MethodCallExpression rightCall && rightCall.Method.Name == "ToString" && rightCall.Object is MemberExpression rightMember)
-                        right = rightMember;
-
-                    object? constValue = null;
-                    MemberExpression? memberExpr = null;
-
-                    if (left is MemberExpression mLeft)
-                    {
-                        memberExpr = mLeft;
-                        constValue = Evaluate(right);
-                    }
-                    else if (right is MemberExpression mRight)
-                    {
-                        memberExpr = mRight;
-                        constValue = Evaluate(left);
-                    }
-                    else
-                        throw new NotSupportedException($"BinaryExpression '{expr}' não suportado.");
-
-                    var fieldName = GetAliasName(memberExpr);
-                    if (fieldName == "id")
-                        return $"@id:{constValue}";
-
-                    return $"@{fieldName}:{constValue}";
-
-                case MethodCallExpression call:
-                    if (call.Method.Name == nameof(string.Contains) &&
-                        call.Object is MemberExpression memberContains &&
-                        call.Arguments[0] is ConstantExpression argContains)
-                    {
-                        return $"@{GetAliasName(memberContains)}:*{argContains.Value}*";
-                    }
-
-                    if (call.Method.Name == nameof(string.StartsWith) &&
-                        call.Object is MemberExpression memberStarts &&
-                        call.Arguments[0] is ConstantExpression argStarts)
-                    {
-                        return $"@{GetAliasName(memberStarts)}:{argStarts.Value}*";
-                    }
-
-                    if (call.Method.Name == nameof(string.EndsWith) &&
-                        call.Object is MemberExpression memberEnds &&
-                        call.Arguments[0] is ConstantExpression argEnds)
-                    {
-                        return $"@{GetAliasName(memberEnds)}:*{argEnds.Value}";
-                    }
-
-                    throw new NotSupportedException($"Chamada de método '{call.Method.Name}' não suportada.");
-
-                case MemberExpression memberAccess:
-                    return $"@{GetAliasName(memberAccess)}:*";
-
-                case ConstantExpression constant:
-                    return constant.Value?.ToString() ?? "";
-
-                case UnaryExpression unary:
-                    return Translate(unary.Operand);
-
-                default:
-                    throw new NotSupportedException($"Expressão '{expr.NodeType}' não suportada.");
-            }
-        }
-
-        private string GetAliasName(MemberExpression member)
-        {
-            if (member.Member is PropertyInfo prop)
-            {
-                var jsonAttr = prop.GetCustomAttribute<JsonPropertyAttribute>();
-                return jsonAttr?.PropertyName ?? prop.Name;
-            }
-
-            return member.Member.Name;
         }
     }
 }
